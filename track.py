@@ -17,7 +17,7 @@ IFTTT_URL = os.getenv('IFTTT_URL')
 
 def interruptHandler(signum, frame):
     print('Signal %s intercepted, shutting down and reverting state' % signal.strsignal(signum))
-    c.execute("DROP TABLE tempplaylists")
+    conn.execute("DROP TABLE tempplaylists")
     conn.commit()
     conn.interrupt()
     conn.close()
@@ -50,20 +50,20 @@ else:
 print('Starting at ' + datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S") + ' UTC')
 sp = spotifywebapi.Spotify(CLIENT_ID, CLIENT_SECRET)
 conn = sqlite3.connect(datafile)
-c = conn.cursor()
-c.execute("CREATE TABLE tempplaylists (user text, playlistid text)")
-if redo_flag is False:
-    oldtime = c.execute("SELECT timepoint FROM timepoint").fetchone()[0]
-    offset = datetime.datetime.fromisoformat(oldtime)
-    print('Using UTC offset of ' + offset.strftime("%Y-%m-%d %H:%M:%S") + '\n')
-    c.execute("DELETE FROM timepoint")
-    c.execute("DELETE FROM oldtimepoint")
-    c.execute("INSERT INTO timepoint VALUES (?)", (datetime.datetime.utcnow().isoformat(),))
-    c.execute("INSERT INTO oldtimepoint VALUES (?)", (oldtime,))
-else:
-    oldtime = c.execute("SELECT timepoint FROM oldtimepoint").fetchone()[0]
-    offset = datetime.datetime.fromisoformat(oldtime)
-    print('Using old UTC offset of ' + offset.strftime("%Y-%m-%d %H:%M:%S") + '\n')
+with conn:
+    conn.execute("CREATE TABLE tempplaylists (user text, playlistid text)")
+    if redo_flag is False:
+        oldtime = conn.execute("SELECT timepoint FROM timepoint").fetchone()[0]
+        offset = datetime.datetime.fromisoformat(oldtime)
+        print('Using UTC offset of ' + offset.strftime("%Y-%m-%d %H:%M:%S") + '\n')
+        conn.execute("DELETE FROM timepoint")
+        conn.execute("DELETE FROM oldtimepoint")
+        conn.execute("INSERT INTO timepoint VALUES (?)", (datetime.datetime.utcnow().isoformat(),))
+        conn.execute("INSERT INTO oldtimepoint VALUES (?)", (oldtime,))
+    else:
+        oldtime = conn.execute("SELECT timepoint FROM oldtimepoint").fetchone()[0]
+        offset = datetime.datetime.fromisoformat(oldtime)
+        print('Using old UTC offset of ' + offset.strftime("%Y-%m-%d %H:%M:%S") + '\n')
 
 executor = ThreadPoolExecutor()
 for us in users:
@@ -86,14 +86,16 @@ for us in users:
         if "Top Songs " in playlist['name'] or playlist['owner']['id'] != us:
             continue
 
-        c.execute("INSERT INTO tempplaylists VALUES (?, ?)", (us, playlist['id']))
+        with conn:
+            conn.execute("INSERT INTO tempplaylists VALUES (?, ?)", (us, playlist['id']))
         futures.append(executor.submit(addTrackIds, playlist, temptrackids))
 
     wait(futures)
     
     print('Finished pulling tracks')
-    c.execute("SELECT playlistid FROM tempplaylists WHERE user=? AND playlistid NOT IN (SELECT playlistid FROM playlists WHERE user=?)", (us, us))
-    playlistids = c.fetchall()
+    with conn:
+        tempc = conn.execute("SELECT playlistid FROM tempplaylists WHERE user=? AND playlistid NOT IN (SELECT playlistid FROM playlists WHERE user=?)", (us, us))
+    playlistids = tempc.fetchall()
     for i in playlistids:
         temp = sp.getPlaylistFromId(i[0])
         value1 = 'New playlist {} detected for user {}'.format(temp['name'], us)
@@ -114,8 +116,9 @@ for us in users:
     print('Finished user %s' % us)
 
 executor.shutdown()
-c.execute("DROP TABLE playlists")
-c.execute("ALTER TABLE tempplaylists RENAME TO playlists")
+with conn:
+    conn.execute("DROP TABLE playlists")
+    conn.execute("ALTER TABLE tempplaylists RENAME TO playlists")
 print('Committing database...')
 conn.commit()
 print('\nFinished at ' + datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S") + '\n')

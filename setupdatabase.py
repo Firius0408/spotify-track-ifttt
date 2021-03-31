@@ -26,11 +26,12 @@ print(datetime.datetime.today().strftime("%Y-%m-%d %H:%M:%S") + '\n')
 sp = spotifywebapi.Spotify(CLIENT_ID, CLIENT_SECRET)
 conn = sqlite3.connect(datafile)
 c = conn.cursor()
-c.execute("CREATE TABLE playlists (user text, playlistid text)")
-c.execute("CREATE TABLE timepoint (timepoint text)")
-c.execute("CREATE TABLE oldtimepoint (timepoint text)")
-c.execute("INSERT INTO timepoint VALUES (?)", (datetime.datetime.utcnow().isoformat(),))
-c.execute("INSERT INTO oldtimepoint VALUES (?)", (datetime.datetime.utcnow().isoformat(),))
+with conn:
+    conn.execute("CREATE TABLE playlists (user text, playlistid text)")
+    conn.execute("CREATE TABLE timepoint (timepoint text)")
+    conn.execute("CREATE TABLE oldtimepoint (timepoint text)")
+    conn.execute("INSERT INTO timepoint VALUES (?)", (datetime.datetime.utcnow().isoformat(),))
+    conn.execute("INSERT INTO oldtimepoint VALUES (?)", (datetime.datetime.utcnow().isoformat(),))
 for us in users:
     print('Starting user %s' % us)
     try:
@@ -42,7 +43,7 @@ for us in users:
         exit(1)
 
     for playlist in playlists:
-        c.execute("INSERT INTO playlists VALUES (?, ?)", (us, playlist['id']))
+        conn.execute("INSERT INTO playlists VALUES (?, ?)", (us, playlist['id']))
 
     print('Finished user %s' % us)
 
