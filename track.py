@@ -6,10 +6,7 @@ import datetime
 import os
 import signal
 from concurrent.futures import ThreadPoolExecutor, wait
-from dotenv import load_dotenv
 from users import users
-
-load_dotenv()
 
 CLIENT_ID = os.getenv('SPOTIFY_CLIENT_ID') 
 CLIENT_SECRET = os.getenv('SPOTIFY_CLIENT_SECRET')

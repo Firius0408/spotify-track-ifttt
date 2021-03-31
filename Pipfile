@@ -9,4 +9,3 @@ pylint = "*"
 [packages]
 requests = "*"
 spotifywebapi = "*"
-python-dotenv = "*"
