@@ -1,10 +1,12 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "7c600f34d62ec1ad50835224482452a908cdd7352f87e1eb8bd4b8dd9b037646"
+            "sha256": "4567cf5521bebaf2e97005c3569ec190e62c56c916200b75668e5af938aebd0a"
         },
         "pipfile-spec": 6,
-        "requires": {},
+        "requires": {
+            "python_version": "3.9"
+        },
         "sources": [
             {
                 "name": "pypi",
@@ -47,11 +49,11 @@
         },
         "spotifywebapi": {
             "hashes": [
-                "sha256:c6ada0f48b5864237750a5d784f13442ebbcdf664c99c06496144ff3e8c5374a",
-                "sha256:f16a0b5051b8838798c912a50a091c452b581b0842fff5d1fa21beee3053a1f1"
+                "sha256:a65842ff9b943de9e3fdb1857bc84c9f8aad785a27e9e9b07479eae865240f58",
+                "sha256:ebf598f0b9de8abaa07cf621475d7b145e2abfbd431118684aa8b3c1d5ad53ec"
             ],
             "index": "pypi",
-            "version": "==1.1.2"
+            "version": "==1.1.3"
         },
         "urllib3": {
             "hashes": [
