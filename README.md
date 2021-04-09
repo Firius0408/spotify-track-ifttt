@@ -4,7 +4,7 @@ Simple python scripts to track users playlists for new song updates and push not
 
 ## Setup
 
-This project uses Python >=3.6 and pipenv, and SQLite for database
+This project uses Python 3.9 and pipenv, and SQLite for database
 
 Spotify API keys and IFTTT webhook should be placed in `.env`:
 
