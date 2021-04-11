@@ -68,12 +68,12 @@ for us in users:
     try:
         user = sp.getUser(us)
     except:
-        print('Error with user %s: %s' % (us, sys.exc_info()[0]))
+        print('Error with user %s: %s' % (us, sys.exc_info()[1]))
         continue
     try:
         playlists = sp.getUserPlaylists(user)
     except:
-        print('Error with user %s playlists: %s' % (us, sys.exc_info()[0]))
+        print('Error with user %s playlists: %s' % (us, sys.exc_info()[1]))
         continue
 
     print('Finished pulling playlists')
